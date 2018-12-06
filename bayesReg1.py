@@ -5,12 +5,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 import pylab as pl
+import math as m
 
 
 def likelihoodF(a,b,sd,x,y):
     pred = a*x + b
-    singlelikelihoods = norm.logsf(y, pred, sd)
-    sumll = sum(singlelikelihoods)
+    # singlelikelihoods = norm.logsf(y, pred, sd)
+    # singlelikelihoods = norm.logsf(y, pred, sd)
+    sumll=0.0
+    singlelikelihoods = norm.pdf(y, pred, sd)
+    for p in singlelikelihoods:
+        sumll += m.log(p)
+
+    
+    # sumll = sum(singlelikelihoods)
     return(sumll)   
 
 def consSlopeLikelihoodF(trueA,trueB,trueSd,x,y):
@@ -33,7 +41,7 @@ def main():
     r1=trueA * x
     r2 =trueB * x
     r3=(trueSd * np.random.randn(sampleSize))
-    y =  trueA * x + trueB * x +(trueSd * np.random.randn(sampleSize))
+    y =  (trueA * x) + trueB +(np.random.normal(0,trueSd,sampleSize))
     plt.scatter(x, y)
     plt.show()
     rv = likelihoodF(trueA,trueB,trueSd,x,y)
