@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+# import pymc3 as pm
+from pymc3 import  *
 
 
 sns.set(style="darkgrid", palette="muted")
@@ -41,6 +43,33 @@ def simulate_linear_data(N, beta_0, beta_1, eps_sigma_sq):
 
     return df
 
+def glm_mcmc_inference(df, iterations=5000):
+    """
+    Calculates the Markov Chain Monte Carlo trace of
+    a Generalised Linear Model Bayesian linear regression 
+    model on supplied data.
+
+    df: DataFrame containing the data
+    iterations: Number of iterations to carry out MCMC for
+    """
+    # Use PyMC3 to construct a model context
+    # basic_model = pm.Model()
+    with Model() as model:
+        # Create the glm using the Patsy model syntax
+        # We use a Normal distribution for the likelihood
+        glm.GLM.from_formula("y ~ x", df)
+       
+        # Use Maximum A Posteriori (MAP) optimisation as initial value for MCMC
+        # start = pm.find_MAP()
+
+        # Use the No-U-Turn Sampler
+        # step = pm.NUTS()
+
+        # Calculate the trace
+        trace = sample(3000)
+
+    return trace
+
 
 if __name__ == "__main__":
     # These are our "true" parameters
@@ -56,6 +85,11 @@ if __name__ == "__main__":
 
     # Plot the data, and a frequentist linear regression fit
     # using the seaborn package
-    sns.lmplot(x="x", y="y", data=df, size=10)
+    sns.lmplot(x="x", y="y", data=df, height=10)
     plt.xlim(0.0, 1.0)
+    plt.show()
+    trace = glm_mcmc_inference(df, iterations=5000)
+    plt.figure(figsize=(7, 7))
+    traceplot(trace[100:])
+    plt.tight_layout();
     plt.show()
