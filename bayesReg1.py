@@ -23,10 +23,10 @@ def likelihoodF(a,b,sd,x,y):
     return(sum(singlelikelihoods))
 
 def consSlopeLikelihoodF(trueA,trueB,trueSd,x,y):
-    seqL = pl.frange(3.0,7.0,0.05).tolist()
+    seqL = pl.frange(-3.,3.0,0.05).tolist()
     slopeLikelihoodL=[]
-    for a in seqL:
-        slopeLikelihoodL.append(likelihoodF(a,trueB,trueSd,x,y))
+    for b in seqL:
+        slopeLikelihoodL.append(likelihoodF(trueA,b,trueSd,x,y))
     return seqL,slopeLikelihoodL
 
 def prior(a,b,sd):
@@ -60,6 +60,18 @@ def run_metropolis_MCMC(startvalueT,x,y,iterationsI):
             chain[i+1]=chain[i,]
     return(chain)
 
+def draw_histograms(df, variables, n_rows, n_cols):
+    fig=plt.figure()
+    for i, var_name in enumerate(variables):
+        ax=fig.add_subplot(n_rows,n_cols,i+1)
+        df[var_name].hist(bins=10,ax=ax)
+        ax.set_title(str(var_name)+" Distribution")
+    # fig.tight_layout()  # Improves appearance a bit.
+    plt.show()
+
+# test = pd.DataFrame(np.random.randn(30, 9), columns=map(str, range(9)))
+# draw_histograms(test, test.columns, 3, 3)
+
 def main():
     trueA = 5.
     trueB = 0.
@@ -67,13 +79,13 @@ def main():
     sampleSize = 31
 
     x = np.array(range(-int((sampleSize-1)/2),int((sampleSize+1)/2)))
-    y =  (trueA * x) + (trueB*x) +(np.random.normal(0,trueSd,sampleSize))
+    y =  (trueA * x) + (trueB) +(np.random.normal(0,trueSd,sampleSize))
     # plt.scatter(x, y)
     # plt.show()
-    rv = likelihoodF(trueA,trueB,trueSd,x,y)
+    likelihoodF(trueA,trueB,trueSd,x,y)
     seqL,slopeLikelihoodL = consSlopeLikelihoodF(trueA,trueB,trueSd,x,y)
-    # plt.plot(seqL,slopeLikelihoodL)
-    # plt.show()
+    plt.plot(seqL,slopeLikelihoodL)
+    plt.show()
 
     startvalue = (4.0,0.0,10.0)
     chain = run_metropolis_MCMC(startvalue,x,y,10000)
@@ -86,6 +98,10 @@ def main():
     print(f'b mean: should be 0: {statistics.mean(df.loc[:,1])}')
     print(f'b sd: should be ?: {statistics.stdev(df.loc[:,1])}')
     print(f'sd: should be 10: {statistics.mean(df.loc[:,2])}')
+    # first_col=df.take([0], axis=1)
+    # print(first_col)
+    print(df.iloc[:,0])
+    draw_histograms(df, df.columns, 1, 3)
 
 
 if __name__ == '__main__':
